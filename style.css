@@ -1,0 +1,83 @@
+body {
+	font-family: monospace;
+	color: #eee;
+	background-color: #111;
+}
+
+img {
+	max-width:100%;
+}
+
+.container {
+	display: flex;
+	flex-direction: column;
+	width:66%;
+	margin: 0 auto;
+}
+
+.header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.body {
+	flex-direction: column;
+	flex: 1;
+}
+
+.footer {
+	display: flex;
+	justify-content: space-between;
+}
+
+.table {
+	display: flex;
+	flex-wrap: wrap;
+	margin: 3em 0 0 0;
+	padding: 0;
+}
+
+.cell {
+	box-sizing: border-box;
+	flex-grow: 1;
+	width: 30%;
+	margin: 0 10px 20px 0;
+	overflow: hidden;
+}
+
+.centered {
+	text-align: center;
+	overflow: hidden;
+}
+
+.button {
+	box-sizing:border-box;
+	font-family: monospace;
+	background-color: #111;
+	border: 1px solid #999;
+	padding: 5px 5px;
+	margin: 10px 0px;
+	color: #eee;
+	width: 100%;
+}
+
+.inputfile {
+	width: 0.1px;
+	height: 0.1px;
+	opacity: 0;
+	overflow: hidden;
+	position: absolute;
+	z-index: -1;
+}
+
+.inputfile + label {
+	cursor: pointer; /* "hand" cursor */
+}
+
+td {
+  border: 1px solid #202020;
+  padding: 0px 10px;
+  width: 10%;
+  text-align: center;
+}

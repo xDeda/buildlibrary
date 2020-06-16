@@ -1,0 +1,76 @@
+<!-- 
+BUILD LIBRARY TODO:
+
+upload form finish (add description)
+upload filename structure (give files their db index as filename)
+upload.php structure (insert into database)
+
+register page
+register hook to db
+
+rip and loop builds from db on frontpage
+add link to upload page (lol)
+figure out a design to display comments/likes/description of a build (give build its own page? /buildlibrary/build/?id=333)
+
+login somewhere
+user system security stuff (oh no?!)
+delete posts system
+delete user and ALL their stuff
+
+search function (search has its own page? /buildlibrary/search/?q=tagname)
+search multiple tags
+search user
+
+user page with all their builds/comments/likes
+
+extra future features:
+crop image on upload
+show builds i've liked as user
+ -->
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>TFM Builds Library</title>
+		<link rel="stylesheet" href="style.css">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	</head>
+	<body>
+		<div class="container">
+			<div class="header">
+				<h1>THE BUILD LIBRARY</h1> <form><input type="text" class="button" placeholder="search"></form>
+			</div>
+			<div class="body">				
+				<h2>Latest</h2>
+				
+				<div class="centered">
+					@code<br>
+					<img src="build.png"><br>
+					#tag #tag #tag
+				</div>
+				
+				<div class="table">
+					<div class="cell">@code<br><img src="build.png"><br>#tag #tag #tag</div>
+					<div class="cell">@code<br><img src="build.png"><br>#tag #tag #tag</div>
+					<div class="cell">@code<br><img src="build.png"><br>#tag #tag #tag</div>
+
+					<div class="cell">@code<br><img src="build.png"><br>#tag #tag #tag</div>
+					<div class="cell">@code<br><img src="build.png"><br>#tag #tag #tag</div>
+					<div class="cell">@code<br><img src="build.png"><br>#tag #tag #tag</div>
+
+					<div class="cell">@code<br><img src="build.png"><br>#tag #tag #tag</div>
+					<div class="cell">@code<br><img src="build.png"><br>#tag #tag #tag</div>
+					<div class="cell">@code<br><img src="build.png"><br>#tag #tag #tag</div>
+				</div>
+				<div class="centered">
+					<-- 1 2 3 -->
+				</div>
+			</div>
+			<div class="footer">
+				<span>(github link)</span>
+				<span>fuck copyright 2020</span>
+			</div>
+		</div>
+	</body>
+</html>

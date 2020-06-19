@@ -1,11 +1,20 @@
 body {
-	font-family: monospace;
+	font-family: sans-serif;
 	color: #eee;
 	background-color: #111;
 }
 
 img {
 	max-width:100%;
+}
+
+a {
+	color: #ccc;
+	text-decoration: none;
+}
+
+h1 {
+	font-family: Arial;
 }
 
 .container {
@@ -40,13 +49,35 @@ img {
 
 .cell {
 	box-sizing: border-box;
+	border: 1px solid #202020;
+	width: 40%;
 	flex-grow: 1;
-	width: 30%;
-	margin: 0 10px 20px 0;
+	margin: 0 10px 10px 0;
+	padding: 5px 10px;
+	padding-bottom: 20px;
+	position: relative;
 	overflow: hidden;
 }
 
+.cellbot {
+  display: inline-block;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 1em;
+  padding-left: 10px;
+  padding-bottom: 10px;
+}
+
+.cellbot::before {
+  display: inline-block;  
+  height: 100%;
+  vertical-align: baseline;
+  content: '';
+}
+
 .centered {
+	display: block;
 	text-align: center;
 	overflow: hidden;
 }
@@ -60,6 +91,17 @@ img {
 	margin: 10px 0px;
 	color: #eee;
 	width: 100%;
+}
+
+.login {
+	display: inline;
+	float: left;
+	font-family: monospace;
+	background-color: #111;
+	border: 1px solid #999;
+	padding: 5px 5px;
+	margin: 10px 5px;
+	color: #eee;
 }
 
 .inputfile {

@@ -5,20 +5,15 @@ function mynl2br($text) {
 
 if ($_POST['username'] != "" && $_POST['password'] != "") {
 
+	require '../header.php';
+
 	$username = $_POST['username'];
 	$password = $_POST['password'];
 	$hashed_password = password_hash($password, PASSWORD_DEFAULT);
-	
-	$servername = "localhost";
-	$dbusername = "dbusername";
-	$dbpassword = "dbpassword";
-	$dbname = "buildlibrary";
 
 	$username = mynl2br($username);
 	$username = addslashes($username);
 	$username = strip_tags($username, '<br>');
-
-	$link = mysqli_connect($servername, $dbusername, $dbpassword, $dbname);
 
 	if($link === false) {
 		die("ERROR: Could not connect. " . mysqli_connect_error());

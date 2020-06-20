@@ -13,6 +13,11 @@ a {
 	text-decoration: none;
 }
 
+a:hover {
+	color: #eee;
+	text-decoration: underline;
+}
+
 h1 {
 	font-family: Arial;
 }
@@ -43,7 +48,7 @@ h1 {
 .table {
 	display: flex;
 	flex-wrap: wrap;
-	margin: 3em 0 0 0;
+	margin: 0 0 0 0;
 	padding: 0;
 }
 

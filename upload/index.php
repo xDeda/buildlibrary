@@ -20,22 +20,12 @@ function compareSessID($funcname, $funcid) {
 
 if ($_POST['url'] != "") {
 
-	function compareSessID($funcname, $funcid) {
-		global $link;
-		$sql = "SELECT * FROM users WHERE name='$funcname'";
-		$result = mysqli_query($link, $sql);
-		$row = mysqli_fetch_assoc($result);
-		if ($funcid == $row[session_id]) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 	$url = $_POST['url'];
-	if (isset($_SESSION['loggedin'])) {
-		$name = $_SESSION['loggedin_name'];
-		$author_id = $_SESSION['loggedin_id'];
+	$logged = 0;
+	if (isset($_COOKIE[loggedin]) && compareSessID($_COOKIE[loggedin_username],$_COOKIE[session_id]) === true) {
+		$logged = 1;
+		$name = $_COOKIE[loggedin_username];
+		$author_id = $_COOKIE[session_id];
 	} else {
 		$name = mynl2br(addslashes(strip_tags($_POST['name'], '<br>')));
 	}
@@ -50,7 +40,7 @@ if ($_POST['url'] != "") {
 		die("ERROR: Could not connect. " . mysqli_connect_error());
 	}
 
-	if(isset($_COOKIE[loggedin]) && compareSessID($_COOKIE[loggedin_username],$_COOKIE[session_id]) === true) {
+	if($logged == 1) {
 		$sql = "INSERT INTO posts (id, name, description, image, postdate, mapcode, author_id) VALUES (NULL, '$_COOKIE[loggedin_username]', '$description', '$url', NULL, '$mapcode', '$_COOKIE[loggedin_id]')";
 	} else {
 		$sql = "INSERT INTO posts (id, name, description, image, postdate, mapcode, author_id) VALUES (NULL, 'Guest $name', '$description', '$url', NULL, '$mapcode', NULL)";
@@ -111,6 +101,7 @@ if ($_POST['url'] != "") {
 		<meta charset="UTF-8">
 		<title>TFM Builds Library</title>
 		<link rel="stylesheet" href="../style.css">
+		<link rel="stylesheet" href="../shimmer.css">
 		<link href="./dropzone.css" rel="stylesheet" media="screen">
 		<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.7/cropper.min.css" rel="stylesheet">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -118,9 +109,9 @@ if ($_POST['url'] != "") {
 	</head>
 	<body>
 		<div class="container">
-			<div class="header">
-				<h1><a href="../">THE BUILD LIBRARY</a></h1><?php if(isset($_COOKIE[loggedin_username]) && compareSessID($_COOKIE[loggedin_username],$_COOKIE[session_id]) === true) { echo "<span>you are logged in as $_COOKIE[loggedin_username] <a href=\"http://niclasjensen.dk/buildlibrary/?logout\">[logout]</a></span>"; } else { echo '<form action="./" method="post"><input type="text" class="login" placeholder="username" name="loginname"><input type="password" class="login" placeholder="password" name="loginpassword"><input type="submit" class="login" value="login"><small><a href="http://niclasjensen.dk/buildlibrary/register/">[register]</a></small></form>'; } ?><form><input type="text" class="vcentered button" size="27" placeholder="search?! but this is upload"></form>
-			</div>
+			<?php
+			include '../htmlheader.php';
+			?>
 			<div class="body">
 				<form action="./" method="post" enctype="multipart/form-data">
 					<table style="width:65%">

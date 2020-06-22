@@ -3,16 +3,16 @@
 require 'header.php';
 
 function getUserIpAddr(){
-    if(!empty($_SERVER['HTTP_CLIENT_IP'])){
-        //ip from share internet
-        $ip = $_SERVER['HTTP_CLIENT_IP'];
-    }elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])){
-        //ip pass from proxy
-        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    }else{
-        $ip = $_SERVER['REMOTE_ADDR'];
-    }
-    return $ip;
+	if(!empty($_SERVER['HTTP_CLIENT_IP'])){
+		//ip from share internet
+		$ip = $_SERVER['HTTP_CLIENT_IP'];
+	}elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])){
+		//ip pass from proxy
+		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+	}else{
+		$ip = $_SERVER['REMOTE_ADDR'];
+	}
+	return $ip;
 }
 
 function compareSessID($funcname, $funcid) {
@@ -32,7 +32,7 @@ if(isset($_GET['logout'])) {
 	setcookie("loggedin_id", "", time() - 3600);
 	setcookie("loggedin_username", "", time() - 3600);
 	setcookie("session_id", "", time() - 3600);
-	header("Refresh:0; url=http://niclasjensen.dk/buildlibrary/");
+	header("Refresh:0; url=" . $site_url);
 } elseif(isset($_POST['loginname'])) {
 
 	$loginname = $_POST['loginname'];
@@ -49,16 +49,16 @@ if(isset($_GET['logout'])) {
 
 	if (password_verify($loginpassword, $hash)) {
 		$cookietime = time() + 86400 * 30; // 86400 = 1 day
-		setcookie("loggedin", 1, $cookietime, "/buildlibrary");
-		setcookie("loggedin_id", $row['id'], $cookietime, "/buildlibrary");
-		setcookie("loggedin_username", $row['name'], $cookietime, "/buildlibrary");
+		setcookie("loggedin", 1, $cookietime, $site_path);
+		setcookie("loggedin_id", $row['id'], $cookietime, $site_path);
+		setcookie("loggedin_username", $row['name'], $cookietime, $site_path);
 		$session_id = hash('sha256', $row['name'] . getUserIpAddr() . rand());
-		setcookie("session_id", $session_id, $cookietime, "/buildlibrary");
+		setcookie("session_id", $session_id, $cookietime, $site_path);
 		echo "you are logged in! welcome " . $row['name'];
 		$sql = "UPDATE users SET session_id = '$session_id' WHERE id='$row[id]'";
 		if(mysqli_query($link, $sql)) {
 			echo "<br>session id set!";
-			header("Refresh:0; url=http://niclasjensen.dk/buildlibrary/");
+			header("Refresh:0; url=" . $site_url);
 		} else {
 			echo "<br>session id failed :(";
 		}
@@ -86,16 +86,48 @@ if(isset($_GET['logout'])) {
 			?>
 			<div class="body">
 				<?php
-				if(isset($_GET["id"])) {
-					include "getid.php";
-				} elseif (isset($_GET['tag_id'])) {
-					include "gettagid.php";
-				} elseif (isset($_GET['tag'])) {
-					include "gettag.php";
-				} elseif (isset($_GET['name'])) {
-					include "getname.php";
-				} elseif (isset($_GET['mapcode'])) {
-					include "getmapcode.php";
+				if (isset($_GET['id'])) {
+					include 'getid.php';
+				} elseif (isset($_GET['tag_id']) || isset($_GET['tag']) || isset($_GET['name']) || isset($_GET['mapcode'])) {
+					echo "<div class=\"centered\">";
+					$sql = "SELECT *, p.name AS p_name, p.id AS p_id FROM posts p";  // resolve ambiguous column names 'name' and 'id'
+					if (isset($_GET['tag_id']) || isset($_GET['tag'])) {
+						$sql .= " INNER JOIN post_tags pt ON p.id = pt.post_id";
+						if (isset($_GET['tag']))
+							$sql .= " INNER JOIN tags t ON pt.tag_id = t.id";
+					}
+					$sql_conditions = [];
+					if (isset($_GET["id"]))
+						$sql_conditions[] = "id=" . $_GET["id"];
+					if (isset($_GET['tag_id']))
+						$sql_conditions[] = "tag_id =" . $_GET['tag_id'];
+					if (isset($_GET['tag']))
+						$sql_conditions[] = "t.name = '" . $_GET['tag'] . "'";
+					if (isset($_GET['name']))
+						$sql_conditions[] = "p.name = '" . $_GET['name'] . "'";
+					if (isset($_GET['mapcode']))
+						$sql_conditions[] = "mapcode = '" . $_GET['mapcode'] . "'";
+					
+					$sql .= " WHERE " . implode(" AND ", $sql_conditions);
+					
+					$result = $link->query($sql);
+					if ($result->num_rows > 0) {
+						while($row = $result->fetch_assoc()) {
+							echo "<div class=\"cell\"><span><a href=\"./?mapcode=$row[mapcode]\"><span class=\"mapcode\">@$row[mapcode]</span></a> by <a href=\"./?name=$row[name]\"><span class=\"name\">$row[p_name]</span></a></span><span style=\"float:right;\"><a href=\"./?id=$row[p_id]\">#$row[p_id]</a></span><br><a href=\"./?id=$row[p_id]\"><img src=\"$row[image]\" style=\"margin: 10px 0px;\"></a><br><span class=\"cellbot\">";
+							$sql2 = "SELECT name FROM tags t INNER JOIN post_tags pt ON t.id = pt.tag_id WHERE pt.post_id = " . $row['p_id'];
+							$result2 = $link->query($sql2);
+							if ($result2->num_rows > 0) {
+								while($row2 = $result2->fetch_assoc()) {
+									echo "<a href=\"./?tag=$row2[name]\"><span class=\"tag\">#$row2[name]</span></a> ";
+								}
+							}
+							echo "</span></div>";
+						}
+					} else {
+						echo "0 results";
+					}
+					echo "</div>";
+					echo "<div class=\"centered\"><-- 1 2 3 --></div>";
 				} else {
 
 					echo "<div class=\"centered\">";

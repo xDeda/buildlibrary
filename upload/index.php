@@ -113,7 +113,7 @@ if ($_POST['url'] != "") {
 			include '../htmlheader.php';
 			?>
 			<div class="body">
-				<form action="./" method="post" enctype="multipart/form-data">
+				<form action="./" method="post" id="upload-form" enctype="multipart/form-data">
 					<table style="width:65%">
 						<tr>
 							<td colspan="1"></td>
@@ -132,9 +132,9 @@ if ($_POST['url'] != "") {
 							    <div class="dropzone"></div>
 							    <div class="croparea" style="display:none;">
 							        <img id="cropper-img" style="max-width:100%;">
-							        <input value="upload image" name="submit" id="crop-btn" type="button" class="button">
+							        <input value="confirm crop" id="crop-btn" type="button" class="button-free">
+							        <input value="undo crop" id="uncrop-btn" type="button" class="button-free">
 							    </div>
-							    <div id="preview" style="display:none;"></div>
 							</td>
 						</tr>
 						<tr>
@@ -157,7 +157,7 @@ if ($_POST['url'] != "") {
 						</tr>
 						<tr>
 							<td colspan="10">
-								<input type="submit" value="upload build" name="submit" class="button">
+								<input type="submit" value="upload build" id="upload-btn" class="button">
 							</td>
 						</tr>
 						<tr>
@@ -187,27 +187,54 @@ if ($_POST['url'] != "") {
 <script>
 const image = document.getElementById('cropper-img');
 const cropper = new Cropper(image, {
-    initialAspectRatio: 16 / 9,
+    preview: '#preview',
+    //initialAspectRatio: 16 / 9,
+    autoCropArea: 1,
+    viewMode: 1,
 });
+var prev_imgs = [];
+var curr_img = null;
+var uploading = false;
 
 setDropzoneCallback(eventFileChosen);
 
 $('#urlpaste').change(function(){
-	$('.dropzone').html('<img src="'+ $('#urlpaste').val() +'">');
-	urlPaste = $('#urlpaste').val();
-	$('#url').val(urlPaste);
+    eventExternalImage($('#urlpaste').val());
+});
+
+$('#crop-btn').click(function() {
+    cropper.getCroppedCanvas({imageSmoothingEnabled: false, imageSmoothingQuality: 'high'}).toBlob(function(blob) {
+        cropper.replace(URL.createObjectURL(blob));
+        prev_imgs.push(curr_img);
+        curr_img = blob;
+    });
+});
+$('#uncrop-btn').click(function() {
+    if (prev_imgs.length > 0) {
+        curr_img = prev_imgs.pop();
+        cropper.replace(URL.createObjectURL(curr_img));
+    }
+});
+
+$('#upload-form').submit(function(e) {
+    e.preventDefault();
+    if (uploading) return;
+    doImageUpload(curr_img);
+    $('#upload-btn').val("uploading image...")
+    $('#upload-btn').prop('disabled', true);
+    uploading = true;
 });
 
 function eventImgurUploaded(res) {
     if (res.success === true) {
-        $('#preview').html('<img src=\"'+ res.data.link + '\">');
         $("#url").val(res.data.link);
-        $("#urlpaste").val(res.data.link);
+        $('#urlpaste').val(res.data.link);
+        document.getElementById("upload-form").submit();
     } else {
-        $('#preview').html('something on the moon went wrong');
+        $('#upload-btn').val("something on the moon went wrong... try again")
+        $('#upload-btn').prop('disabled', false);
+        uploading = false;
     }
-    $('.croparea').hide();
-    $('#preview').show();
 }
 
 function eventFileChosen(file) {
@@ -219,14 +246,30 @@ function eventFileChosen(file) {
 		    cropper.replace(ev.target.result);
             $('.dropzone').hide();
             $('.croparea').show();
-            $('#crop-btn').click(function() {
-                let img = cropper.getCroppedCanvas().toDataURL();
-                doImageUpload(img);
-            });
+            
 		}
-
+        curr_img = file;
 		reader.readAsDataURL(file);
 	}
+}
+// TODO: will break with discord.. the external image must allow CORS.. 
+function eventExternalImage(url) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.responseType = 'blob';
+    
+    xhr.onload = function(e) {
+        if (this.status !== 200) {
+            $("#url").val(url);
+            return;
+        }
+        $('.dropzone').hide();
+        $('.croparea').show();
+        curr_img = this.response;
+        cropper.replace(URL.createObjectURL(curr_img));
+    };
+    
+    xhr.send();
 }
 
 var config = {
@@ -257,28 +300,11 @@ function imgurPost(path, data, callback) {
     xhttp = null;
 }
 
-/* https://stackoverflow.com/a/38935990 */
-function dataURItoFile(datauri, filename) {
-    var arr = datauri.split(','),
-        mime = arr[0].match(/:(.*?);/)[1],
-        bstr = atob(arr[1]), 
-        n = bstr.length, 
-        u8arr = new Uint8Array(n);
-        
-    while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
-    }
-    
-    return new File([u8arr], filename, {type:mime});
-}
-    
-function doImageUpload(img_uri) {
+function doImageUpload(blob) {
     var fd = new FormData();
-    fd.append('image', dataURItoFile(img_uri));
+    fd.append('image', blob);
 
-    /* some loading spinner here? idk */
     imgurPost("https://api.imgur.com/3/image", fd, function(data) {
-         /* close some loading spinner here? idk */
         eventImgurUploaded(data);
     });
 }

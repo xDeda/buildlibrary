@@ -114,6 +114,16 @@ h1 {
 	width: 100%;
 }
 
+.button-free {
+	display: inline;
+	font-family: monospace;
+	background-color: #111;
+	border: 1px solid #999;
+	padding: 5px 5px;
+	margin: 10px 0px;
+	color: #eee;
+}
+
 .login {
 	display: inline;
 	float: left;
